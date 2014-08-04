@@ -1,0 +1,6 @@
+
+[[_introduction]]
+= Introduction
+
+Provides a shortcut for adding feed icons for based on {link_feedicons}.
+

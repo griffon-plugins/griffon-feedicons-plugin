@@ -1,0 +1,4 @@
+
+:link_feedicons: link:http://www.zeusboxstudio.com/[ZeusBox Studio's Feed Icons, window="_blank"]
+:api_link_feedicon_javafx: link:api/griffon/javafx/support/feedicons/FeedIcon.html[griffon.javafx.support.feedicons.FeedIcon, window="_blank"]
+:api_link_feedicon_swing: link:api/griffon/swing/support/feedicons/FeedIcon.html[griffon.swing.support.feedicons.FeedIcon, window="_blank"]
