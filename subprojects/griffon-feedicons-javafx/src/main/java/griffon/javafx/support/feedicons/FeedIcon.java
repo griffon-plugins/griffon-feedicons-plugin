@@ -45,7 +45,7 @@ public class FeedIcon extends Image {
 
     @Nonnull
     private static String toURL(@Nonnull Feed feed, int size) {
-        requireNonNull(feed, "Argument 'country' must not be null.");
+        requireNonNull(feed, "Argument 'feed' must not be null.");
         String resource = feed.asResource(size);
         return Thread.currentThread().getContextClassLoader().getResource(resource).toExternalForm();
     }
