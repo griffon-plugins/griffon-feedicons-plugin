@@ -148,10 +148,10 @@ task generateIconCheatSheet << {
     }
 
     String document = '''
-    [[icon_sheat_cheet]]
+    [[icon_cheat_cheet]]
     = Icon Cheat Sheet
 
-    The following tables show all available icons.
+    The following table shows all available icons.
 
     [columns="3*", options="header"]
     |===

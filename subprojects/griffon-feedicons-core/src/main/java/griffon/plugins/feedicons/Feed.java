@@ -31,7 +31,7 @@ public enum Feed {
     COMMENT_RSS_DELETE("comment_rss_delete"),
     COMMENT_RSS_INFO("comment_rss_info"),
     FEED_SOURECe("feed_source"),
-    FLAG("feed"),
+    FEED("feed"),
     FOLDER("folder"),
     FOLDER_ADD("folder_add"),
     FOLDER_REMOVE("folder_remove"),
