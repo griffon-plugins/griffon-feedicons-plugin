@@ -19,15 +19,19 @@ import griffon.plugins.feedicons.Feed;
 import javafx.scene.image.Image;
 
 import javax.annotation.Nonnull;
+import java.net.URL;
 
+import static griffon.plugins.feedicons.Feed.invalidDescription;
+import static griffon.util.GriffonNameUtils.requireNonBlank;
 import static java.util.Objects.requireNonNull;
 
 /**
  * @author Andres Almiray
  */
 public class FeedIcon extends Image {
-    private final Feed feed;
-    private final int size;
+    private static final String ERROR_FEED_NULL = "Argument 'feed' must not be null.";
+    private Feed feed;
+    private int size;
 
     public FeedIcon(@Nonnull Feed feed) {
         this(feed, 16);
@@ -35,19 +39,46 @@ public class FeedIcon extends Image {
 
     public FeedIcon(@Nonnull Feed feed, int size) {
         super(toURL(feed, size), true);
-        this.feed = feed;
+        this.feed = requireNonNull(feed, ERROR_FEED_NULL);
         this.size = size;
     }
 
     public FeedIcon(@Nonnull String description) {
-        this(Feed.findByDescription(description));
+        super(toURL(description));
+        feed = Feed.findByDescription(description);
+
+        String[] parts = description.split(":");
+        if (parts.length == 2) {
+            try {
+                size = Integer.parseInt(parts[1]);
+            } catch (NumberFormatException e) {
+                throw invalidDescription(description, e);
+            }
+        } else {
+            size = 16;
+        }
     }
 
     @Nonnull
     private static String toURL(@Nonnull Feed feed, int size) {
-        requireNonNull(feed, "Argument 'feed' must not be null.");
+        requireNonNull(feed, ERROR_FEED_NULL);
         String resource = feed.asResource(size);
-        return Thread.currentThread().getContextClassLoader().getResource(resource).toExternalForm();
+        URL url = Thread.currentThread().getContextClassLoader().getResource(resource);
+        if (url == null) {
+            throw new IllegalArgumentException("Icon " + feed + ":" + size + " does not exist");
+        }
+        return url.toExternalForm();
+    }
+
+    @Nonnull
+    private static String toURL(@Nonnull String description) {
+        requireNonBlank(description, "Argument 'description' must not be blank");
+        String resource = Feed.asResource(description);
+        URL url = Thread.currentThread().getContextClassLoader().getResource(resource);
+        if (url == null) {
+            throw new IllegalArgumentException("Icon " + description + " does not exist");
+        }
+        return url.toExternalForm();
     }
 
     @Nonnull

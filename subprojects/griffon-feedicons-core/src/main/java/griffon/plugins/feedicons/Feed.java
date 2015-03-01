@@ -19,6 +19,7 @@ import javax.annotation.Nonnull;
 
 import static griffon.util.GriffonClassUtils.requireState;
 import static griffon.util.GriffonNameUtils.isBlank;
+import static griffon.util.GriffonNameUtils.requireNonBlank;
 
 /**
  * @author Andres Almiray
@@ -58,6 +59,8 @@ public enum Feed {
     SUBSCRIBE("subscribe"),
     UNSUBSCRIBE("unsubscribe");
 
+    private static final String ERROR_DESCRIPTION_BLANK = "Argument 'description' must not be blank";
+
     private final String description;
 
     Feed(@Nonnull String description) {
@@ -71,21 +74,112 @@ public enum Feed {
 
     @Nonnull
     public String asResource(int size) {
-        requireState(size == 16 || size == 32, "Argument 'size' must be either 16 or 32.");
+        requireValidSize(size);
         return "com/zeusboxstudio/icons/" + size + "x" + size + "/" + description + ".png";
     }
 
     @Nonnull
-    public static Feed findByDescription(@Nonnull String description) {
-        if (isBlank(description)) {
-            throw new IllegalArgumentException("Description " + description + " is not a valid Feed icon description");
+    public static String asResource(@Nonnull String description) {
+        int size = 16;
+        checkDescription(description);
+
+        String[] parts = description.split(":");
+        if (parts.length == 2) {
+            try {
+                size = Integer.parseInt(parts[1]);
+            } catch (NumberFormatException e) {
+                throw invalidDescription(description, e);
+            }
         }
 
-        for (Feed feed : values()) {
-            if (feed.description.equalsIgnoreCase(description)) {
+        Feed feed = findByDescription(description, size);
+        return feed.asResource(size);
+    }
+
+    @Nonnull
+    public static Feed findByDescription(@Nonnull String description) {
+        checkDescription(description);
+
+        Feed feed = null;
+        String[] parts = description.split(":");
+        for (Feed f : values()) {
+            if (f.description.equalsIgnoreCase(parts[0])) {
+                feed = f;
+                break;
+            }
+        }
+
+        if (feed == null) {
+            throw invalidDescription(description);
+        }
+
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        if (parts.length == 2) {
+            int size = 16;
+            try {
+                size = Integer.parseInt(parts[1]);
+            } catch (NumberFormatException e) {
+                throw invalidDescription(description, e);
+            }
+            if (classLoader.getResource(feed.asResource(size)) != null) {
                 return feed;
             }
         }
-        throw new IllegalArgumentException("Description " + description + " is not a a valid Feed icon description");
+
+        if (classLoader.getResource(feed.asResource(16)) != null) {
+            return feed;
+        } else if (classLoader.getResource(feed.asResource(32)) != null) {
+            return feed;
+        }
+
+        throw invalidDescription(description);
+    }
+
+    @Nonnull
+    public static Feed findByDescription(@Nonnull String description, int size) {
+        checkDescription(description);
+
+        Feed feed = null;
+        String[] parts = description.split(":");
+        for (Feed f : values()) {
+            if (f.description.equalsIgnoreCase(parts[0])) {
+                feed = f;
+                break;
+            }
+        }
+
+        if (feed == null) {
+            throw invalidDescription(description);
+        }
+
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        if (classLoader.getResource(feed.asResource(size)) != null) {
+            return feed;
+        }
+
+        throw invalidDescription(description);
+    }
+
+    public static int requireValidSize(int size) {
+        requireState(size == 16 || size == 32, "Argument 'size' must be either 16 or 32.");
+        return size;
+    }
+
+    private static void checkDescription(String description) {
+        if (isBlank(description)) {
+            throw invalidDescription(description);
+        }
+    }
+
+    @Nonnull
+    public static IllegalArgumentException invalidDescription(@Nonnull String description) {
+        requireNonBlank(description, ERROR_DESCRIPTION_BLANK);
+        throw new IllegalArgumentException("Description " + description + " is not a valid Feed icon description");
+    }
+
+    @Nonnull
+    public static IllegalArgumentException invalidDescription(@Nonnull String description, Exception e) {
+        requireNonBlank(description, ERROR_DESCRIPTION_BLANK);
+        throw new IllegalArgumentException("Description " + description + " is not a valid Feed icon description", e);
     }
 }
