@@ -4,3 +4,5 @@
 
 Provides a shortcut for adding feed icons based on {link_feedicons}.
 
+Griffon version: {griffon-version}
+
